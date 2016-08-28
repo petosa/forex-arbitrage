@@ -1,0 +1,25 @@
+{
+  "name": "forex_arbitrage",
+  "version": "1.0.0",
+  "description": "Script that detects arbitrage opportunities in currency exchange markets.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petosa/forex-arbitrage.git"
+  },
+  "keywords": [
+    "forex",
+    "arbitrage",
+    "currency",
+    "exchange"
+  ],
+  "author": "Nick Petosa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/petosa/forex-arbitrage/issues"
+  },
+  "homepage": "https://github.com/petosa/forex-arbitrage#readme"
+}
