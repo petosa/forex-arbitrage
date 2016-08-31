@@ -2,7 +2,7 @@
   "name": "forex_arbitrage",
   "version": "1.0.0",
   "description": "Script that detects arbitrage opportunities in currency exchange markets.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/petosa/forex-arbitrage/issues"
   },
-  "homepage": "https://github.com/petosa/forex-arbitrage#readme"
+  "homepage": "https://github.com/petosa/forex-arbitrage#readme",
+  "dependencies": {
+    "request": "^2.74.0",
+    "xml2js": "^0.4.17"
+  }
 }
