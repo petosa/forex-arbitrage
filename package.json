@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/petosa/forex-arbitrage#readme",
   "dependencies": {
-    "request": "^2.74.0",
-    "xml2js": "^0.4.17"
+    "request": "^2.74.0"
   }
 }
