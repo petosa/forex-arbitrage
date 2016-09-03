@@ -2,6 +2,9 @@
 Script that detects arbitrage opportunities in the OANDA currency exchange markets.
 Makes calls to the OANDA API to acquire forex data. This data is then analyzed for triangular arbitrage opportunities within the OANDA platform.
 
+# Credentials
+Open credentials.json and add your API Key and accountID from OANDA's platform.
+
 # How to use
 Make sure Node.js is installed on your machine. I am using version 4.4.7.
 
