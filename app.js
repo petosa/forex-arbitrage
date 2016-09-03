@@ -1,4 +1,5 @@
 var request = require('request');
+var creds = require('./credentials.json');
 var currencies = ["USD", "EUR", "JPY", "GBP", "AUD", "CHF", "CAD", "MXN", "CNY"];
 
 var getConversionArray = function(currencies) {
@@ -20,23 +21,20 @@ var sanitizeConversionArray = function(arr) {
 	return str;
 }
 
-var arbitrage = function(currencies, data) {
-	var len = currencies.length;
-	var arr = [];
+var arbitrage = function(data) {
 	for (var i = 0; i < data.length; i++) {
-		var mySymbol = data[i].id.substring(0, 3);
-		var myTarget = data[i].id.substring(3, 6);
+		var mySymbol = data[i].Name.substring(0, 3);
+		var myTarget = data[i].Name.substring(4, 7);
 		for (var j = 0; j < data.length; j++) {
-			var leg1Symbol = data[j].id.substring(0, 3);
-			var leg1Target = data[j].id.substring(3, 6);
+			var leg1Symbol = data[j].Name.substring(0, 3);
+			var leg1Target = data[j].Name.substring(4, 7);
 			if (leg1Symbol == myTarget && leg1Target != mySymbol) {
 				for (var k = 0; k < data.length; k++) {
-					if (data[k].id == leg1Target + mySymbol) {
-						var buy1 = data[i].Ask;
-						var buy2 = data[j].Ask;
-						var sell = data[k].Bid;
-						var res = buy1 * buy2 * sell;
-						console.log(res + ": " + data[i].id + "->" + data[j].id + "->" + data[k].id);
+					if (data[k].Name === leg1Target + "_" + mySymbol) {
+						var res = data[i].Rate * data[j].Rate * data[k].Rate;
+					if (res > 1)
+						console.log(res + ": " + data[i].Name + " " + data[i].Rate + " -> " 
+					+ data[j].Name + " " + data[j].Rate + " -> " + data[k].Name + " " + data[k].Rate);
 					}
 				}				
 			}
@@ -45,14 +43,48 @@ var arbitrage = function(currencies, data) {
 	}
 }
 
-var url = "http://query.yahooapis.com/v1/public/yql?q=select * from " + 
-"yahoo.finance.xchange where pair in " + sanitizeConversionArray(getConversionArray(currencies))
-+ "&env=store://datatables.org/alltableswithkeys&format=json";
+function buildHeader(myURL) {
+	return {
+		url: myURL,
+		headers: {
+			'Authorization': 'Bearer ' + creds.API_Key
+		}
+	};
+}
 
-request(url, function (error, response, body) {
+function priceCallback(error, response, body) {
 	if (!error && response.statusCode == 200) {
-		var obj = JSON.parse(body).query.results.rate;
-		arbitrage(currencies, obj);
+		var ultimate = [];
+		var obj = JSON.parse(body).prices;
+		for (var i = 0; i < obj.length; i++) {
+			if (obj[i].bids) {
+				var symb = obj[i].instrument;
+				ultimate.push({
+					Name: symb,
+					Rate: obj[i].bids[0].price,
+					Order: "sell " + symb			
+				});
+				ultimate.push({
+					Name: symb.substring(4, 7) + "_" + symb.substring(0, 3),
+					Rate: 1 / (obj[i].asks[0].price),
+					Order: "buy " + symb
+				});
+			}
+		}
+		arbitrage(ultimate);
 	}
-})
+}
 
+function pairCallback(error, response, body) {
+	if (!error && response.statusCode == 200) {
+		var obj = JSON.parse(body).instruments;
+		var pairs = "";
+		for (var i = 0; i < obj.length; i++) {
+			pairs = pairs + "," + obj[i].name;
+		}
+		pairs = pairs.substring(0, pairs.length - 1);
+		request(buildHeader("https://api-" + creds.env + ".oanda.com/v3/accounts/" + creds.accountID + "/pricing?instruments=" + pairs), priceCallback);
+	}
+}
+
+request(buildHeader("https://api-" + creds.env + ".oanda.com/v3/accounts/" + creds.accountID + "/instruments"), pairCallback);
